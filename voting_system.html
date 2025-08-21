@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votación Herramientas IA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .demo-notice {
+            padding: 20px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            text-align: center;
+            font-weight: 500;
+            color: #2d3436;
+        }
+
+        .demo-notice h3 {
+            margin-bottom: 10px;
+            color: #2d3436;
+        }
+
+        .demo-notice p {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .setup-steps {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .setup-steps ol {
+            margin-left: 20px;
+        }
+
+        .setup-steps li {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .code-snippet {
+            background: #2d3436;
+            color: #00b894;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 20px;
+            background: none;
+            border: none;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-button:hover {
+            background: #e9ecef;
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #667eea;
+        }
+
+        .reset-button {
+            background: #ff6b6b !important;
+            color: white !important;
+            border-radius: 0 15px 0 0 !important;
+            transition: all 0.3s ease;
+        }
+
+        .reset-button:hover {
+            background: #ff5252 !important;
+            transform: translateY(-2px);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 40px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .voting-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .option-card {
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .option-card.selected {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .option-card.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .option-card h3 {
+            font-size: 1.4em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .option-card p {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .chatgpt { background-color: #B9E4DA; }
+        .gemini { background-color: #CDE2FA; }
+        .notebooklm { background-color: #E2D4F7; }
+        .deepseek { background-color: #E0E0E0; }
+
+        .vote-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .vote-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .vote-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .results-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .result-item {
+            margin-bottom: 25px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.5s ease;
+        }
+
+        .result-header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .result-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 0 0 10px 10px;
+            overflow: hidden;
+        }
+
+        .result-fill {
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+            transition: width 1s ease;
+            border-radius: 4px;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .total-votes {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .demo-results {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .demo-results h4 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .simulate-button {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .simulate-button:hover {
+            background: #138496;
+            transform: translateY(-1px);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .voting-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .container {
+                margin: 10px;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Votación Herramientas IA</h1>
+            <p>Elige la herramienta de inteligencia artificial generativa que hizo mejor su definición</p>
+        </div>
+
+        <div class="demo-notice">
+            <h3>🎯 Demo Interactivo - Sistema de Votación</h3>
+            <p>Esta es una <strong>demostración completamente funcional</strong> del sistema de votación. Puedes votar, ver resultados y probarlo completamente.</p>
+            
+            <div class="setup-steps">
+                <h4>📋 Para hacer una votación REAL compartible:</h4>
+                <ol>
+                    <li><strong>Descarga el código:</strong> Copia todo este HTML y guárdalo como <code>votacion.html</code></li>
+                    <li><strong>Súbelo gratis a:</strong> GitHub Pages, Netlify, Vercel, o cualquier hosting gratuito</li>
+                    <li><strong>Comparte la URL:</strong> Todos podrán votar desde sus dispositivos</li>
+                    <li><strong>Para datos compartidos:</strong> Conecta con Firebase, Supabase o PlanetScale (gratuitos)</li>
+                </ol>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🆓</div>
+                        <h4>100% Gratuito</h4>
+                        <p>No requiere pago, solo hosting gratuito</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h4>Responsive</h4>
+                        <p>Funciona en móviles y escritorio</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h4>Rápido</h4>
+                        <p>Carga instantánea, sin dependencias</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h4>Un voto por usuario</h4>
+                        <p>Sistema de identificación único</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('voting')">Votar</button>
+            <button class="tab-button" onclick="showTab('results')">Resultados</button>
+            <button class="tab-button" onclick="showTab('setup')">Configuración</button>
+            <button class="tab-button reset-button" onclick="resetVoting()">🔄 Reiniciar</button>
+        </div>
+
+        <div id="voting" class="tab-content active">
+            <div id="status-message"></div>
+            
+            <div class="voting-options">
+                <div class="option-card chatgpt" data-option="chatgpt">
+                    <h3>ChatGPT</h3>
+                    <p>Desarrollado por OpenAI, ChatGPT es conocido por sus conversaciones naturales y capacidades versátiles en múltiples tareas.</p>
+                </div>
+                
+                <div class="option-card gemini" data-option="gemini">
+                    <h3>Gemini</h3>
+                    <p>La IA de Google que combina búsqueda web con conversación inteligente, ofreciendo respuestas actualizadas y precisas.</p>
+                </div>
+                
+                <div class="option-card notebooklm" data-option="notebooklm">
+                    <h3>NotebookLM</h3>
+                    <p>Herramienta de Google especializada en análisis de documentos y creación de resúmenes inteligentes.</p>
+                </div>
+                
+                <div class="option-card deepseek" data-option="deepseek">
+                    <h3>DeepSeek</h3>
+                    <p>IA emergente conocida por su eficiencia y capacidades avanzadas en razonamiento y programación.</p>
+                </div>
+            </div>
+            
+            <button class="vote-button" id="vote-btn" onclick="submitVote()" disabled>Selecciona una opción</button>
+        </div>
+
+        <div id="results" class="tab-content">
+            <div class="total-votes" id="total-votes">Total de votos: 0</div>
+            <div class="results-container" id="results-container">
+                <div class="demo-results">
+                    <h4>🎮 Simular Votos para Demo</h4>
+                    <p>Haz clic en estos botones para simular votos y ver cómo se verían los resultados:</p>
+                    <div style="margin-top: 15px;">
+                        <button class="simulate-button" onclick="simulateVote('chatgpt')">+1 ChatGPT</button>
+                        <button class="simulate-button" onclick="simulateVote('gemini')">+1 Gemini</button>
+                        <button class="simulate-button" onclick="simulateVote('notebooklm')">+1 NotebookLM</button>
+                        <button class="simulate-button" onclick="simulateVote('deepseek')">+1 DeepSeek</button>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="simulate-button" onclick="simulateRandomVotes()">🎲 +10 Votos Aleatorios</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="setup" class="tab-content">
+            <div style="max-width: 600px; margin: 0 auto;">
+                <h3 style="text-align: center; margin-bottom: 30px;">⚙️ Configuración para Votación Real</h3>
+                
+                <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 25px;">
+                    <h4 style="color: #495057; margin-bottom: 15px;">🌐 Opción 1: Hosting Gratuito (Recomendado)</h4>
+                    <p style="margin-bottom: 15px; line-height: 1.6;">Para una votación real compartible:</p>
+                    <ol style="margin-left: 20px; line-height: 1.8;">
+                        <li>Copia este código HTML completo</li>
+                        <li>Créalo como archivo <strong>index.html</strong></li>
+                        <li>Sube a <strong>GitHub Pages</strong>, <strong>Netlify</strong>, o <strong>Vercel</strong> (todos gratuitos)</li>
+                        <li>Obtienes una URL para compartir: <code>https://tuusuario.github.io/votacion</code></li>
+                    </ol>
+                </div>
+
+                <div style="background: #e3f2fd; padding: 25px; border-radius: 10px; margin-bottom: 25px;">
+                    <h4 style="color: #1565c0; margin-bottom: 15px;">☁️ Opción 2: Base de Datos Real</h4>
+                    <p style="margin-bottom: 15px; line-height: 1.6;">Para votos persistentes entre usuarios:</p>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>Firebase:</strong> 10GB gratis, tiempo real</li>
+                        <li><strong>Supabase:</strong> PostgreSQL gratuito</li>
+                        <li><strong>PlanetScale:</strong> MySQL serverless</li>
+                        <li><strong>MongoDB Atlas:</strong> 512MB gratis</li>
+                    </ul>
+                </div>
+
+                <div style="background: #f3e5f5; padding: 25px; border-radius: 10px;">
+                    <h4 style="color: #7b1fa2; margin-bottom: 15px;">🔧 Personalización</h4>
+                    <p style="margin-bottom: 15px; line-height: 1.6;">Fácil de modificar:</p>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>Cambia las opciones de votación</li>
+                        <li>Modifica colores y estilos</li>
+                        <li>Añade más opciones</li>
+                        <li>Personaliza mensajes</li>
+                    </ul>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button onclick="downloadHTML()" style="background: #28a745; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 1.1em;">
+                        📥 Descargar Código HTML
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let votes = JSON.parse(localStorage.getItem('demo_votes')) || {
+            chatgpt: 0,
+            gemini: 0,
+            notebooklm: 0,
+            deepseek: 0
+        };
+        
+        let hasVoted = localStorage.getItem('demo_has_voted') === 'true';
+        let selectedOption = null;
+
+        // Nombres y colores para mostrar
+        const optionNames = {
+            chatgpt: 'ChatGPT',
+            gemini: 'Gemini', 
+            notebooklm: 'NotebookLM',
+            deepseek: 'DeepSeek'
+        };
+
+        const optionColors = {
+            chatgpt: '#B9E4DA',
+            gemini: '#CDE2FA',
+            notebooklm: '#E2D4F7',
+            deepseek: '#E0E0E0'
+        };
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            updateVotingInterface();
+            updateResults();
+        });
+
+        function setupEventListeners() {
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    if (!hasVoted && !this.classList.contains('disabled')) {
+                        selectOption(this.dataset.option);
+                    }
+                });
+            });
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function selectOption(option) {
+            if (hasVoted) return;
+            
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            document.querySelector(`[data-option="${option}"]`).classList.add('selected');
+            selectedOption = option;
+            
+            document.getElementById('vote-btn').disabled = false;
+            document.getElementById('vote-btn').textContent = 'Enviar Voto';
+        }
+
+        function submitVote() {
+            if (!selectedOption || hasVoted) return;
+            
+            votes[selectedOption]++;
+            hasVoted = true;
+            
+            localStorage.setItem('demo_votes', JSON.stringify(votes));
+            localStorage.setItem('demo_has_voted', 'true');
+            
+            updateVotingInterface();
+            updateResults();
+            showStatusMessage('¡Gracias por votar! Tu voto ha sido registrado exitosamente. 🎉', 'success');
+        }
+
+        function simulateVote(option) {
+            votes[option]++;
+            localStorage.setItem('demo_votes', JSON.stringify(votes));
+            updateResults();
+            showStatusMessage(`Voto simulado para ${optionNames[option]} 🎮`, 'success');
+        }
+
+        function simulateRandomVotes() {
+            const options = Object.keys(votes);
+            for (let i = 0; i < 10; i++) {
+                const randomOption = options[Math.floor(Math.random() * options.length)];
+                votes[randomOption]++;
+            }
+            localStorage.setItem('demo_votes', JSON.stringify(votes));
+            updateResults();
+            showStatusMessage('¡10 votos aleatorios añadidos! 🎲', 'success');
+        }
+
+        function updateVotingInterface() {
+            const voteBtn = document.getElementById('vote-btn');
+            const cards = document.querySelectorAll('.option-card');
+            
+            if (hasVoted) {
+                voteBtn.disabled = true;
+                voteBtn.textContent = 'Ya has votado ✓';
+                
+                cards.forEach(card => {
+                    card.classList.add('disabled');
+                });
+                
+                showStatusMessage('Ya has emitido tu voto en esta demo. 📊', 'warning');
+            } else {
+                voteBtn.disabled = selectedOption === null;
+                voteBtn.textContent = selectedOption ? 'Enviar Voto' : 'Selecciona una opción';
+                
+                cards.forEach(card => {
+                    card.classList.remove('disabled');
+                });
+            }
+        }
+
+        function showStatusMessage(message, type) {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.innerHTML = `<div class="status-message ${type}">${message}</div>`;
+        }
+
+        function updateResults() {
+            const totalVotes = Object.values(votes).reduce((sum, count) => sum + count, 0);
+            const resultsContainer = document.getElementById('results-container');
+            const totalVotesElement = document.getElementById('total-votes');
+            
+            totalVotesElement.textContent = `Total de votos: ${totalVotes} (Demo)`;
+            
+            if (totalVotes === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="demo-results">
+                        <h4>🎮 Simular Votos para Demo</h4>
+                        <p>Haz clic en estos botones para simular votos y ver cómo se verían los resultados:</p>
+                        <div style="margin-top: 15px;">
+                            <button class="simulate-button" onclick="simulateVote('chatgpt')">+1 ChatGPT</button>
+                            <button class="simulate-button" onclick="simulateVote('gemini')">+1 Gemini</button>
+                            <button class="simulate-button" onclick="simulateVote('notebooklm')">+1 NotebookLM</button>
+                            <button class="simulate-button" onclick="simulateVote('deepseek')">+1 DeepSeek</button>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button class="simulate-button" onclick="simulateRandomVotes()">🎲 +10 Votos Aleatorios</button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const sortedOptions = Object.entries(votes)
+                .sort(([,a], [,b]) => b - a)
+                .map(([option, count]) => ({
+                    option,
+                    count,
+                    percentage: totalVotes > 0 ? ((count / totalVotes) * 100).toFixed(1) : 0
+                }));
+            
+            let resultsHTML = sortedOptions.map((item, index) => `
+                <div class="result-item" style="animation-delay: ${index * 0.1}s;">
+                    <div class="result-header" style="background-color: ${optionColors[item.option]};">
+                        <span>${optionNames[item.option]}</span>
+                        <span>${item.count} votos (${item.percentage}%)</span>
+                    </div>
+                    <div class="result-bar">
+                        <div class="result-fill" style="width: ${item.percentage}%"></div>
+                    </div>
+                </div>
+            `).join('');
+
+            resultsHTML += `
+                <div class="demo-results">
+                    <h4>🎮 Continúa probando</h4>
+                    <p>Añade más votos para ver los resultados en acción:</p>
+                    <div style="margin-top: 15px;">
+                        <button class="simulate-button" onclick="simulateVote('chatgpt')">+1 ChatGPT</button>
+                        <button class="simulate-button" onclick="simulateVote('gemini')">+1 Gemini</button>
+                        <button class="simulate-button" onclick="simulateVote('notebooklm')">+1 NotebookLM</button>
+                        <button class="simulate-button" onclick="simulateVote('deepseek')">+1 DeepSeek</button>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="simulate-button" onclick="simulateRandomVotes()">🎲 +10 Votos Aleatorios</button>
+                    </div>
+                </div>
+            `;
+            
+            resultsContainer.innerHTML = resultsHTML;
+        }
+
+        function resetVoting() {
+            if (confirm('¿Reiniciar la demo? Esto borrará todos los votos de demostración.')) {
+                votes = {
+                    chatgpt: 0,
+                    gemini: 0,
+                    notebooklm: 0,
+                    deepseek: 0
+                };
+                hasVoted = false;
+                selectedOption = null;
+                
+                localStorage.removeItem('demo_votes');
+                localStorage.removeItem('demo_has_voted');
+                
+                document.querySelectorAll('.option-card').forEach(card => {
+                    card.classList.remove('selected', 'disabled');
+                });
+                
+                document.getElementById('vote-btn').disabled = true;
+                document.getElementById('vote-btn').textContent = 'Selecciona una opción';
+                
+                updateResults();
+                showTab('voting');
+                document.querySelector('[onclick="showTab(\'voting\')"]').classList.add('active');
+                
+                showStatusMessage('Demo reiniciada. ¡Puedes votar nuevamente! 🔄', 'success');
+            }
+        }
+
+        function downloadHTML() {
+            const htmlContent = `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votación Herramientas IA</title>
+    <!-- Aquí va el CSS completo -->
+    <style>
+        /* Copia todo el CSS de este archivo */
+    </style>
+</head>
+<body>
+    <!-- Aquí va todo el HTML -->
+    <!-- Modifica la configuración de Firebase o base de datos según necesites -->
+    
+    <script>
+        // Aquí va todo el JavaScript
+        // Conecta con tu base de datos preferida para votos compartidos
+    </script>
+</body>
+</html>`;
+            
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'votacion-ia.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showStatusMessage('¡Código descargado! Edita el archivo para conectar tu base de datos. 💾', 'success');
+        }
+    </script>
+</body>
+</html>
